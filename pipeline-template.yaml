@@ -1,0 +1,165 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AI Pipeline Orchestration
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: python3.9
+
+Resources:
+  # New Lambda Functions
+  InputAnalyzerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: pipeline/input_analyzer/
+      Handler: app.lambda_handler
+
+  ResponseEnhancerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: pipeline/response_enhancer/
+      Handler: app.lambda_handler
+
+  PipelineLoggerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: pipeline/pipeline_logger/
+      Handler: app.lambda_handler
+      Environment:
+        Variables:
+          PIPELINE_LOG_TABLE: !Ref PipelineLogTable
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref PipelineLogTable
+
+  # DynamoDB Table for Pipeline Logs
+  PipelineLogTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: PipelineLogs
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pipeline_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pipeline_id
+          KeyType: HASH
+
+  # Step Functions State Machine
+  AIPipelineStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: AIPipeline
+      RoleArn: !GetAtt StepFunctionsRole.Arn
+      DefinitionString: !Sub |
+        {
+          "Comment": "AI Pipeline with Your Existing Chatbot",
+          "StartAt": "AnalyzeInput",
+          "States": {
+            "AnalyzeInput": {
+              "Type": "Task",
+              "Resource": "${InputAnalyzerFunction.Arn}",
+              "Next": "CallExistingChatbot",
+              "Retry": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "IntervalSeconds": 1,
+                  "MaxAttempts": 2,
+                  "BackoffRate": 2
+                }
+              ]
+            },
+            "CallExistingChatbot": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "serverless-chat-ChatbotFunction-YOUR_FUNCTION_ID",
+                "Payload.$": "$"
+              },
+              "ResultPath": "$.chatbot_response",
+              "OutputPath": "$",
+              "Next": "EnhanceResponse",
+              "Retry": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2
+                }
+              ]
+            },
+            "EnhanceResponse": {
+              "Type": "Task",
+              "Resource": "${ResponseEnhancerFunction.Arn}",
+              "Next": "LogResults"
+            },
+            "LogResults": {
+              "Type": "Task",
+              "Resource": "${PipelineLoggerFunction.Arn}",
+              "End": true
+            }
+          }
+        }
+
+  # IAM Role for Step Functions
+  StepFunctionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: StepFunctionsExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: '*'
+
+  # API Gateway to trigger pipeline
+  PipelineApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: "'*'"
+        AllowHeaders: "'*'"
+        AllowOrigin: "'*'"
+
+  PipelineFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: pipeline/
+      Handler: trigger.lambda_handler
+      Environment:
+        Variables:
+          STATE_MACHINE_ARN: !Ref AIPipelineStateMachine
+      Policies:
+        - Statement:
+          - Effect: Allow
+            Action:
+              - states:StartExecution
+            Resource: !Ref AIPipelineStateMachine
+      Events:
+        PipelineApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PipelineApi
+            Path: /pipeline
+            Method: post
+
+Outputs:
+  PipelineApiUrl:
+    Description: "API Gateway endpoint for the pipeline"
+    Value: !Sub "https://${PipelineApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/pipeline"
+  
+  StateMachineArn:
+    Description: "Step Functions State Machine ARN"
+    Value: !Ref AIPipelineStateMachine
