@@ -10,7 +10,6 @@ Comprehensive monitoring strategy using AWS CloudWatch, Step Functions insights,
 - **CloudWatch**: Metrics, logs, and dashboards
 - **Step Functions Console**: Workflow execution tracking
 - **DynamoDB**: Detailed execution logging
-- **AWS X-Ray**: Distributed tracing (optional)
 
 ## CloudWatch Dashboard
 
@@ -203,55 +202,10 @@ aws sns subscribe \
 
 ## Performance Monitoring
 
-### Baseline Metrics
 - **Average Execution Time**: 3-5 seconds
 - **Success Rate**: > 95%
 - **Lambda Duration**: < 2 seconds per function
 - **DynamoDB Latency**: < 100ms
-
-### Performance Analysis Queries
-
-#### Execution Time Trends
-```bash
-aws cloudwatch get-metric-statistics \
-  --namespace AWS/StepFunctions \
-  --metric-name ExecutionTime \
-  --start-time $(date -d '24 hours ago' --iso-8601) \
-  --end-time $(date --iso-8601) \
-  --period 3600 \
-  --statistics Average,Maximum
-```
-
-#### Error Rate Analysis
-```bash
-aws cloudwatch get-metric-statistics \
-  --namespace AWS/StepFunctions \
-  --metric-name ExecutionsFailed \
-  --start-time $(date -d '24 hours ago' --iso-8601) \
-  --end-time $(date --iso-8601) \
-  --period 3600 \
-  --statistics Sum
-```
-
-## Operational Procedures
-
-### Daily Health Check
-1. Check CloudWatch dashboard for anomalies
-2. Review error logs for any failures
-3. Verify DynamoDB write operations
-4. Monitor execution time trends
-
-### Weekly Review
-1. Analyze performance trends
-2. Review cost metrics
-3. Check for capacity planning needs
-4. Update alert thresholds if needed
-
-### Incident Response
-1. Check Step Functions console for failed executions
-2. Review CloudWatch logs for error details
-3. Query DynamoDB for execution context
-4. Escalate to development team if needed
 
 ## Troubleshooting Guide
 

@@ -73,15 +73,10 @@ Internet → API Gateway → Lambda Trigger → Step Functions → [4 Lambda Sta
 }
 ```
 
-#### Error Handling Strategy
-- **Retry Policy**: Exponential backoff (2-second intervals, 3 max attempts)
-- **Catch Blocks**: All errors logged for debugging
-- **Graceful Degradation**: Pipeline continues on non-critical failures
-
 ### 3. Lambda Functions
 
 #### Input Analyzer Function
-- **Runtime**: Python 3.9
+- **Runtime**: Python 3.11
 - **Memory**: 128 MB
 - **Timeout**: 30 seconds
 - **Logic**: 
@@ -91,7 +86,7 @@ Internet → API Gateway → Lambda Trigger → Step Functions → [4 Lambda Sta
   - Complexity classification
 
 #### Response Enhancer Function
-- **Runtime**: Python 3.9
+- **Runtime**: Python 3.11
 - **Memory**: 128 MB
 - **Timeout**: 30 seconds
 - **Logic**:
@@ -101,7 +96,7 @@ Internet → API Gateway → Lambda Trigger → Step Functions → [4 Lambda Sta
   - Pipeline tracking information
 
 #### Pipeline Logger Function
-- **Runtime**: Python 3.9
+- **Runtime**: Python 3.11
 - **Memory**: 128 MB
 - **Timeout**: 30 seconds
 - **Logic**:
@@ -146,55 +141,6 @@ Internet → API Gateway → Lambda Trigger → Step Functions → [4 Lambda Sta
 4. **Cost**: Pay-per-request pricing model
 5. **Integration**: Native AWS service integration
 
-## Performance Characteristics
-
-### Latency
-- **API Gateway**: < 10ms overhead
-- **Step Functions**: < 100ms orchestration
-- **Lambda Cold Start**: < 2 seconds (first invocation)
-- **Lambda Warm**: < 50ms per function
-- **DynamoDB**: < 10ms write operations
-
-### Throughput
-- **Concurrent Executions**: 1000 default (configurable)
-- **API Gateway**: 10,000 requests per second
-- **Step Functions**: Unlimited executions
-- **DynamoDB**: On-demand scaling
-
-### Resource Allocation
-- **Memory**: 128 MB per Lambda (optimized for cost)
-- **CPU**: Allocated proportionally to memory
-- **Storage**: DynamoDB auto-scaling
-
-## Security Model
-
-### IAM Roles
-1. **Step Functions Execution Role**
-   - Lambda invocation permissions
-   - CloudWatch logging access
-
-2. **Lambda Execution Roles**
-   - DynamoDB read/write permissions
-   - CloudWatch logs access
-   - Bedrock API access (existing chatbot)
-
-### Network Security
-- **VPC**: Not required (managed services)
-- **Encryption**: TLS 1.2 for all API calls
-- **Data Encryption**: DynamoDB encryption at rest
-
-## Scalability Patterns
-
-### Horizontal Scaling
-- **Lambda**: Automatic concurrent execution scaling
-- **DynamoDB**: On-demand capacity scaling
-- **Step Functions**: Unlimited parallel executions
-
-### Vertical Scaling
-- **Memory**: Configurable Lambda memory allocation
-- **CPU**: Automatically scaled with memory
-- **Timeout**: Adjustable per function
-
 ## Monitoring Architecture
 
 ### CloudWatch Integration
@@ -202,9 +148,3 @@ Internet → API Gateway → Lambda Trigger → Step Functions → [4 Lambda Sta
 - **Logs**: Centralized logging for all components
 - **Alarms**: Configurable threshold monitoring
 - **Dashboards**: Real-time visualization
-
-### Custom Metrics
-- **Pipeline Success Rate**: Successful executions / total executions
-- **Average Execution Time**: End-to-end pipeline latency
-- **Error Distribution**: Breakdown by component failure
-- **Cost Tracking**: Per-execution cost analysis

@@ -9,7 +9,7 @@ dashboard_body = {
             "type": "metric",
             "properties": {
                 "metrics": [
-                    ["AWS/StepFunctions", "ExecutionsSucceeded", "StateMachineArn", "YOUR_STATE_MACHINE_ARN"],
+                    ["AWS/StepFunctions", "ExecutionsSucceeded", "StateMachineArn", "arn:aws:states:us-east-2:251761521792:execution:AIPipeline:77520d5a-062d-4266-abb1-d66f12d8b9b5"],
                     [".", "ExecutionsFailed", ".", "."],
                     [".", "ExecutionTime", ".", "."]
                 ],
