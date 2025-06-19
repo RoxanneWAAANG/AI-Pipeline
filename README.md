@@ -25,8 +25,8 @@ The pipeline processes user requests through four orchestrated stages:
 
 ### Step 1: Clone and Setup
 ```bash
-git clone https://github.com/RoxanneWAAANG/AWS-ChatBot.git
-cd AWS-ChatBot
+git clone https://github.com/RoxanneWAAANG/AI-Pipeline.git
+cd AI-Pipeline
 ```
 
 ### Step 2: Deploy Pipeline
@@ -76,7 +76,7 @@ curl -X POST https://o77htsxjbd.execute-api.us-east-2.amazonaws.com/Prod/pipelin
 ## Project Structure
 
 ```
-AWS-ChatBot/
+AI-Pipeline/
 ├── chatbot/                    # Original chatbot implementation
 ├── pipeline/                   # Pipeline components
 │   ├── input_analyzer/         # Input analysis Lambda
