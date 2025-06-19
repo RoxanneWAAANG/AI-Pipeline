@@ -16,10 +16,11 @@ lint = true
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
 resolve_s3 = true
-s3_prefix = "serverless-chat"
+s3_prefix = "ai-pipeline"
 region = "us-east-2"
 disable_rollback = true
 image_repositories = []
+stack_name = "ai-pipeline"
 
 [default.package.parameters]
 resolve_s3 = true

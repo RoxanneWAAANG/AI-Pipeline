@@ -74,7 +74,7 @@ Resources:
               "Type": "Task",
               "Resource": "arn:aws:states:::lambda:invoke",
               "Parameters": {
-                "FunctionName": "serverless-chat-ChatbotFunction-YOUR_FUNCTION_ID",
+                "FunctionName": "serverless-chat-ChatFunction-Z5xyYv8N9K1t",
                 "Payload.$": "$"
               },
               "ResultPath": "$.chatbot_response",
