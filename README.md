@@ -1,4 +1,4 @@
-# Week 2 -- AI Pipeline Orchestration
+# Project 2 -- AI Pipeline Orchestration
 
 A serverless AI pipeline built on AWS that orchestrates conversational AI workflows using Step Functions, Lambda, and comprehensive monitoring.
 
@@ -110,14 +110,3 @@ python -m pytest tests/ --cov=pipeline --cov-report=term
 ```bash
 sam local start-api --template pipeline-template.yaml
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Implement changes with tests
-4. Submit a pull request
-
-## License
-
-This project is part of the Operating AI course at Duke University.
